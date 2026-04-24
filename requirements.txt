@@ -17,8 +17,12 @@ openpyxl>=3.1.0
 # Config
 python-dotenv>=1.0.0
 
-# UI
-streamlit>=1.31.0
+# API Server (replaces Streamlit)
+fastapi>=0.111.0
+uvicorn[standard]>=0.29.0
+
+# Retry logic
+tenacity>=8.2.0
 
 # Validation
 pydantic>=2.5.0
