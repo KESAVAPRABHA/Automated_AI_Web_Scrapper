@@ -1,5 +1,6 @@
-#FastAPI backend for the AI Web Scraper.
-#Command: uvicorn api:app --reload --port 8000
+# FastAPI backend for the AI Web Scraper.
+# Command: uvicorn api:app --reload --port 8000
+
 import sys
 import logging
 import asyncio
@@ -11,10 +12,10 @@ if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
 
 import io
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel, HttpUrl
+from pydantic import BaseModel
 
 sys.path.insert(0, str(Path(__file__).parent))
 
@@ -30,12 +31,12 @@ app = FastAPI(title="AI Web Scraper API", version="2.0.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],          
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["Content-Disposition"],
 )
-
 
 class CrawlRequest(BaseModel):
     url: str
@@ -62,16 +63,24 @@ class ChatResponse(BaseModel):
 class ExportRequest(BaseModel):
     records: List[Dict[str, Any]]
     fmt: str = "csv"
-    filename: Optional[str] = "scraper_results"
+    filename: Optional[str] = None          # optional manual filename
+    user_query: Optional[str] = None        # fallback (AUTO)
 
 
 def generate_filename(name: str) -> str:
     if not name:
         return "scraper_results"
-    safe_name = name.strip().lower().replace(" ", "_")
-    safe_name = safe_name.split("_")[0]
-    
-    return safe_name
+
+    stop_words = {"give", "me", "the", "list", "show", "get", "all"}
+
+    words = name.lower().strip().split()
+    words = [w for w in words if w not in stop_words]
+
+    safe_name = "_".join(words)
+
+    safe_name = "".join(c for c in safe_name if c.isalnum() or c == "_")
+
+    return safe_name or "scraper_results"
 
 
 @app.get("/health")
@@ -81,15 +90,14 @@ async def health() -> Dict[str, str]:
 
 @app.post("/api/crawl", response_model=CrawlResponse)
 async def crawl(req: CrawlRequest) -> CrawlResponse:
-    #Crawl a website and return the scraped pages.
     try:
         if req.use_js:
             crawler = PlaywrightCrawler(delay=1.0)
         else:
             crawler = Crawler(delay=0.8)
 
-        # Run blocking crawler in thread pool to not block event loop
         loop = asyncio.get_event_loop()
+
         pages = await loop.run_in_executor(
             None,
             lambda: crawler.crawl(
@@ -98,7 +106,9 @@ async def crawl(req: CrawlRequest) -> CrawlResponse:
                 same_domain=True,
             ),
         )
+
         return CrawlResponse(pages=pages, count=len(pages))
+
     except Exception as exc:
         logger.error("Crawl error: %s", exc)
         raise HTTPException(status_code=500, detail=str(exc))
@@ -106,10 +116,10 @@ async def crawl(req: CrawlRequest) -> CrawlResponse:
 
 @app.post("/api/chat", response_model=ChatResponse)
 async def chat(req: ChatRequest) -> ChatResponse:
-    #Run AI extraction on previously crawled pages.
     try:
         extractor = AIExtractor()
         loop = asyncio.get_event_loop()
+
         result = await loop.run_in_executor(
             None,
             lambda: extractor.chat_extract(
@@ -118,40 +128,42 @@ async def chat(req: ChatRequest) -> ChatResponse:
                 url=req.url,
             ),
         )
+
         return ChatResponse(
             answer=result.get("answer", ""),
             data=result.get("data", []),
         )
+
     except Exception as exc:
         logger.error("Chat error: %s", exc)
         raise HTTPException(status_code=500, detail=str(exc))
 
+
 @app.post("/api/export")
 async def export_data(req: ExportRequest):
-    # Export extracted records as CSV / JSON / Excel.
+
     if not req.records:
         raise HTTPException(status_code=400, detail="No records to export.")
-    
+
     try:
         exporter = Exporter()
         raw_bytes = exporter.to_bytes(req.records, req.fmt)
 
         mime_map = {
-            "csv":   "text/csv",
-            "json":  "application/json",
+            "csv": "text/csv",
+            "json": "application/json",
             "excel": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         }
 
         ext_map = {
             "csv": "csv",
             "json": "json",
-            "excel": "xlsx"
+            "excel": "xlsx",
         }
 
         fmt = req.fmt.lower()
-
-        #Generate dynamic filename
-        safe_name = generate_filename(req.filename)
+        name_source = req.filename or req.user_query or "scraper_results"
+        safe_name = generate_filename(name_source)
 
         return StreamingResponse(
             io.BytesIO(raw_bytes),
@@ -160,5 +172,7 @@ async def export_data(req: ExportRequest):
                 "Content-Disposition": f'attachment; filename="{safe_name}.{ext_map.get(fmt, fmt)}"'
             },
         )
+
     except Exception as exc:
+        logger.error("Export error: %s", exc)
         raise HTTPException(status_code=500, detail=str(exc))

@@ -14,6 +14,7 @@ export default function App() {
   const [crawling, setCrawling] = useState(false)
   const [thinking, setThinking] = useState(false)
   const [lastRecords, setLastRecords] = useState([])
+  const [lastQuery, setLastQuery] = useState('')
 
   const addMessage = useCallback((role, content, data = []) => {
     setMessages(prev => [...prev, { role, content, data, id: Date.now() + Math.random() }])
@@ -23,6 +24,7 @@ export default function App() {
     setCrawling(true)
     setMessages([])
     setLastRecords([])
+    setLastQuery('')
     setSiteLoaded(false)
     try {
       const res = await fetch(`${API_BASE}/api/crawl`, {
@@ -55,6 +57,7 @@ export default function App() {
 
   const handleChat = useCallback(async (userQuery) => {
     if (!userQuery.trim() || !siteLoaded) return
+    setLastQuery(userQuery)
     addMessage('user', userQuery)
     setThinking(true)
     try {
@@ -89,21 +92,39 @@ export default function App() {
       const res = await fetch(`${API_BASE}/api/export`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ records: lastRecords, fmt }),
+        body: JSON.stringify({
+          records: lastRecords,
+          fmt,
+          user_query: lastQuery,
+        }),
       })
       if (!res.ok) throw new Error('Export failed')
+
       const blob = await res.blob()
-      const extMap = { csv: 'csv', json: 'json', excel: 'xlsx' }
       const url = URL.createObjectURL(blob)
+
+      const contentDisposition = res.headers.get("content-disposition")
+      let filename = `download.${fmt}`
+
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename="(.+)"/)
+        if (match) {
+          filename = match[1]
+        }
+      }
+
       const a = document.createElement('a')
       a.href = url
-      a.download = `scraper_results.${extMap[fmt] || fmt}`
+      a.download = filename
+      document.body.appendChild(a)
       a.click()
+      document.body.removeChild(a)
+
       URL.revokeObjectURL(url)
     } catch (err) {
       alert('Export failed: ' + err.message)
     }
-  }, [lastRecords])
+  }, [lastRecords, lastQuery])
 
   return (
     <div className="app-layout">
