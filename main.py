@@ -86,8 +86,6 @@ Examples:
 def main() -> None:
     parser = build_parser()
     args = parser.parse_args()
-
-    # ── Crawl ──────────────────────────────────────────────────────────────────
     if args.js:
         logger.info("Using Playwright crawler (--js flag set)")
         crawler = PlaywrightCrawler(delay=args.delay)
@@ -106,8 +104,6 @@ def main() -> None:
         sys.exit(1)
 
     logger.info("Crawled %d page(s). Extracting fields: %s", len(pages), args.fields)
-
-    # ── Extract ────────────────────────────────────────────────────────────────
     extractor = AIExtractor()
     records = []
     for page in pages:
@@ -124,11 +120,9 @@ def main() -> None:
         sys.exit(0)
 
     logger.info("Extracted %d record(s).", len(records))
-
-    # ── Export ─────────────────────────────────────────────────────────────────
     exporter = Exporter()
     output_path = exporter.export(records, args.output, args.format)
-    logger.info("✓ Saved → %s", output_path)
+    logger.info("Saved → %s", output_path)
 
 
 if __name__ == "__main__":

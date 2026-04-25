@@ -14,8 +14,8 @@ export default function DataTable({ records }) {
 
   return (
     <div className="data-table-wrap">
-      <div className="data-table-label" style={{padding: '8px 12px 0'}}>
-        📊 {records.length} record{records.length !== 1 ? 's' : ''} extracted
+      <div className="data-table-label" style={{ padding: '8px 12px 0' }}>
+        {records.length} record{records.length !== 1 ? 's' : ''} extracted
       </div>
       <table className="data-table">
         <thead>

@@ -1,7 +1,5 @@
-"""
-FastAPI backend for the AI Web Scraper.
-Run with: uvicorn api:app --reload --port 8000
-"""
+#FastAPI backend for the AI Web Scraper.
+#Command: uvicorn api:app --reload --port 8000
 import sys
 import logging
 import asyncio
@@ -28,18 +26,16 @@ from export.exporter import Exporter
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# ── App setup ──────────────────────────────────────────────────────────────────
 app = FastAPI(title="AI Web Scraper API", version="2.0.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],          # React dev server (any port)
+    allow_origins=["*"],          
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# ── Pydantic schemas ───────────────────────────────────────────────────────────
 
 class CrawlRequest(BaseModel):
     url: str
@@ -66,9 +62,17 @@ class ChatResponse(BaseModel):
 class ExportRequest(BaseModel):
     records: List[Dict[str, Any]]
     fmt: str = "csv"
+    filename: Optional[str] = "scraper_results"
 
 
-# ── Routes ─────────────────────────────────────────────────────────────────────
+def generate_filename(name: str) -> str:
+    if not name:
+        return "scraper_results"
+    safe_name = name.strip().lower().replace(" ", "_")
+    safe_name = safe_name.split("_")[0]
+    
+    return safe_name
+
 
 @app.get("/health")
 async def health() -> Dict[str, str]:
@@ -77,7 +81,7 @@ async def health() -> Dict[str, str]:
 
 @app.post("/api/crawl", response_model=CrawlResponse)
 async def crawl(req: CrawlRequest) -> CrawlResponse:
-    """Crawl a website and return the scraped pages."""
+    #Crawl a website and return the scraped pages.
     try:
         if req.use_js:
             crawler = PlaywrightCrawler(delay=1.0)
@@ -102,7 +106,7 @@ async def crawl(req: CrawlRequest) -> CrawlResponse:
 
 @app.post("/api/chat", response_model=ChatResponse)
 async def chat(req: ChatRequest) -> ChatResponse:
-    """Run AI extraction on previously crawled pages."""
+    #Run AI extraction on previously crawled pages.
     try:
         extractor = AIExtractor()
         loop = asyncio.get_event_loop()
@@ -122,27 +126,38 @@ async def chat(req: ChatRequest) -> ChatResponse:
         logger.error("Chat error: %s", exc)
         raise HTTPException(status_code=500, detail=str(exc))
 
-
 @app.post("/api/export")
 async def export_data(req: ExportRequest):
-    """Export extracted records as CSV / JSON / Excel."""
+    # Export extracted records as CSV / JSON / Excel.
     if not req.records:
         raise HTTPException(status_code=400, detail="No records to export.")
+    
     try:
         exporter = Exporter()
         raw_bytes = exporter.to_bytes(req.records, req.fmt)
+
         mime_map = {
             "csv":   "text/csv",
             "json":  "application/json",
             "excel": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         }
-        ext_map = {"csv": "csv", "json": "json", "excel": "xlsx"}
+
+        ext_map = {
+            "csv": "csv",
+            "json": "json",
+            "excel": "xlsx"
+        }
+
         fmt = req.fmt.lower()
+
+        #Generate dynamic filename
+        safe_name = generate_filename(req.filename)
+
         return StreamingResponse(
             io.BytesIO(raw_bytes),
             media_type=mime_map.get(fmt, "application/octet-stream"),
             headers={
-                "Content-Disposition": f'attachment; filename="scraper_results.{ext_map.get(fmt, fmt)}"'
+                "Content-Disposition": f'attachment; filename="{safe_name}.{ext_map.get(fmt, fmt)}"'
             },
         )
     except Exception as exc:

@@ -30,13 +30,12 @@ export default function Sidebar({
         {/* Brand */}
         <div className="sidebar-brand">
           <div className="sidebar-brand-title">
-            <span>🕸️</span> AI Web Scraper
+            <span></span> AI Web Scraper
           </div>
-          <div className="sidebar-brand-sub">Powered by Gemini 2.5 Flash</div>
         </div>
 
         {/* URL Input */}
-        <div className="sidebar-label">🌐 Target Website</div>
+        <div className="sidebar-label">Target Website</div>
         <input
           id="url-input"
           className="input-field"
@@ -93,14 +92,14 @@ export default function Sidebar({
           {crawling ? (
             <><div className="spin" /> Crawling…</>
           ) : (
-            <><span>🚀</span> Load Site</>
+            <>Load Site</>
           )}
         </button>
 
         <div className="sidebar-divider" />
 
         {/* Status */}
-        <div className="sidebar-label">📡 Status</div>
+        <div className="sidebar-label">Status</div>
         {crawling ? (
           <span className="status-badge badge-loading">
             <span className="badge-dot" /> Crawling…
@@ -111,8 +110,8 @@ export default function Sidebar({
               <span className="badge-dot" /> Site Ready
             </span>
             <div className="site-info">
-              <span>📄 {pageCount} pages cached</span>
-              <span title={currentUrl}>🔗 {currentUrl.length > 34 ? currentUrl.slice(0, 34) + '…' : currentUrl}</span>
+              <span>{pageCount} pages cached</span>
+              <span title={currentUrl}> {currentUrl.length > 34 ? currentUrl.slice(0, 34) + '…' : currentUrl}</span>
             </div>
           </>
         ) : (
@@ -125,7 +124,7 @@ export default function Sidebar({
         {hasRecords && (
           <>
             <div className="sidebar-divider" />
-            <div className="sidebar-label">📥 Export Results</div>
+            <div className="sidebar-label">Export Results</div>
             <select
               id="export-format-select"
               className="export-select"
@@ -141,17 +140,13 @@ export default function Sidebar({
               className="btn-export"
               onClick={() => onExport(exportFmt)}
             >
-              <span>⬇</span> Download {exportFmt.toUpperCase()}
+              <span></span> Download {exportFmt.toUpperCase()}
             </button>
-            <div className="site-info" style={{marginTop: 6}}>
-              <span>📊 {recordCount} records available</span>
+            <div className="site-info" style={{ marginTop: 6 }}>
+              <span>{recordCount} records available</span>
             </div>
           </>
         )}
-      </div>
-
-      <div className="sidebar-footer">
-        Built with FastAPI · LangChain · Gemini · React
       </div>
     </aside>
   )

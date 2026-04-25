@@ -25,7 +25,6 @@ _CHAT_TEXT_LIMIT = 40_000
 
 
 def _is_network_error(exc: Exception) -> bool:
-    """Return True for transient network / DNS errors worth retrying."""
     msg = str(exc).lower()
     return any(k in msg for k in ("getaddrinfo", "connection", "timeout", "503", "429"))
 
@@ -45,7 +44,7 @@ class AIExtractor:
 
     @staticmethod
     def _parse_json(raw: str) -> Dict[str, Any]:
-        """Safely parse JSON from LLM output, stripping markdown fences."""
+        #Safely parse JSON from LLM output, stripping markdown fences.
         raw = raw.strip()
         raw = re.sub(r"^```(?:json)?\s*", "", raw)
         raw = re.sub(r"\s*```$", "", raw)

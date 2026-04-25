@@ -39,7 +39,7 @@ export default function App() {
       setCurrentUrl(url)
       setSiteLoaded(true)
       addMessage('assistant',
-        `✅ <b>Site loaded!</b> I crawled <b>${data.count}</b> page(s) from <code>${url}</code>.<br><br>` +
+        `<b>Site loaded!</b> I crawled <b>${data.count}</b> page(s) from <code>${url}</code>.<br><br>` +
         `Now ask me anything — for example:<br>` +
         `• <i>"Give me the leadership team names"</i><br>` +
         `• <i>"What products do they sell and at what price?"</i><br>` +
@@ -124,7 +124,6 @@ export default function App() {
             <span className="hero-icon">🕸️</span>
             <div>
               <h1 className="hero-title">AI Web Scraper</h1>
-              <p className="hero-sub">Enter a URL in the sidebar → Load Site → ask me anything to extract.</p>
             </div>
           </div>
         </header>

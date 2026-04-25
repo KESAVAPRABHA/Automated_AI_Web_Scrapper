@@ -26,7 +26,6 @@ export default function ChatWindow({ messages, thinking, siteLoaded }) {
           ) : (
             <>
               <h3>Load a website to get started</h3>
-              <p>Enter a URL in the sidebar and click <b>Load Site</b>, then chat with the AI to extract any data you need.</p>
             </>
           )}
         </div>

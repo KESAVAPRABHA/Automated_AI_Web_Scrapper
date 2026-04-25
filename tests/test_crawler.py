@@ -1,4 +1,3 @@
-"""Tests for scraper/crawler.py"""
 import pytest
 from unittest.mock import MagicMock, patch
 
@@ -31,7 +30,7 @@ def _mock_response(html: str, status: int = 200):
 @patch("scraper.crawler.rate_limit")          # skip sleep
 @patch("scraper.crawler.requests.Session")
 def test_crawl_single_page(MockSession, mock_rl):
-    """Single-page crawl returns one result with text."""
+    #Single-page crawl returns one result with text.
     mock_get = MockSession.return_value.get
     mock_get.return_value = _mock_response(FAKE_HTML_HOME)
 
@@ -47,7 +46,7 @@ def test_crawl_single_page(MockSession, mock_rl):
 @patch("scraper.crawler.rate_limit")
 @patch("scraper.crawler.requests.Session")
 def test_crawl_follows_links(MockSession, mock_rl):
-    """Crawler follows internal links and respects max_pages."""
+    #Crawler follows internal links and respects max_pages.
     mock_get = MockSession.return_value.get
     mock_get.side_effect = [
         _mock_response(FAKE_HTML_HOME),
@@ -61,14 +60,13 @@ def test_crawl_follows_links(MockSession, mock_rl):
     urls = [r["url"] for r in results]
     assert "https://acme.com" in urls
     assert any("about" in u for u in urls)
-    # External link should NOT be followed (same_domain=True)
     assert not any("external.com" in u for u in urls)
 
 
 @patch("scraper.crawler.rate_limit")
 @patch("scraper.crawler.requests.Session")
 def test_crawl_respects_max_pages(MockSession, mock_rl):
-    """Crawler never exceeds max_pages."""
+    #Crawler never exceeds max_pages.
     mock_get = MockSession.return_value.get
     mock_get.return_value = _mock_response(
         "<html><body><a href='/p1'>1</a><a href='/p2'>2</a><a href='/p3'>3</a></body></html>"
@@ -84,7 +82,7 @@ def test_crawl_respects_max_pages(MockSession, mock_rl):
 @patch("scraper.crawler.rate_limit")
 @patch("scraper.crawler.requests.Session")
 def test_crawl_handles_fetch_error(MockSession, mock_rl):
-    """Crawler skips pages that return HTTP errors gracefully."""
+#Crawler skips pages that return HTTP errors gracefully.
     import requests as req_lib
     mock_get = MockSession.return_value.get
     mock_get.return_value.raise_for_status.side_effect = req_lib.RequestException("500")

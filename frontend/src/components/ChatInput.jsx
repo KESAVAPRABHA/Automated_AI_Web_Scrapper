@@ -35,8 +35,8 @@ export default function ChatInput({ onSend, disabled, thinking }) {
   const placeholder = disabled && !thinking
     ? 'Load a website first using the sidebar →'
     : thinking
-    ? 'AI is thinking…'
-    : 'Ask me anything — e.g. "Give me all Mark Twain quotes"'
+      ? 'AI is thinking…'
+      : 'Ask me anything'
 
   return (
     <div className="chat-input-bar">
@@ -60,15 +60,12 @@ export default function ChatInput({ onSend, disabled, thinking }) {
           title="Send (Enter)"
         >
           {thinking ? (
-            <div className="spin" style={{borderColor:'rgba(255,255,255,0.3)', borderTopColor:'white'}} />
+            <div className="spin" style={{ borderColor: 'rgba(255,255,255,0.3)', borderTopColor: 'white' }} />
           ) : (
             '↑'
           )}
         </button>
       </div>
-      <p className="chat-hint">
-        {disabled && !thinking ? 'Enter a URL and load a site to start chatting' : 'Press Enter to send · Shift+Enter for new line'}
-      </p>
     </div>
   )
 }

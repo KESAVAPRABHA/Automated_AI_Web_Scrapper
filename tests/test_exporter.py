@@ -1,4 +1,3 @@
-"""Tests for export/exporter.py"""
 import json
 import os
 import tempfile
@@ -18,7 +17,7 @@ def exporter():
     return Exporter()
 
 
-# ── File export tests ──────────────────────────────────────────────────────────
+# File export tests 
 
 def test_export_csv(exporter, tmp_path):
     out = str(tmp_path / "out.csv")
@@ -58,7 +57,7 @@ def test_export_empty_records(exporter, tmp_path):
         exporter.export([], str(tmp_path / "out.csv"), "csv")
 
 
-# ── In-memory bytes tests ──────────────────────────────────────────────────────
+# In-memory bytes tests
 
 def test_to_bytes_csv(exporter):
     raw = exporter.to_bytes(SAMPLE_RECORDS, "csv")
