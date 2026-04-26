@@ -1,6 +1,3 @@
-"""
-pandas-based exporter: CSV, Excel (.xlsx), and JSON.
-"""
 import io
 import json
 import logging

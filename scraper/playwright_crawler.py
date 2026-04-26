@@ -1,7 +1,5 @@
-"""
-Playwright-based crawler for JavaScript-heavy / SPA websites.
-Falls back gracefully if playwright is not installed.
-"""
+#Playwright-based crawler for JavaScript-heavy / SPA websites.
+#Falls back gracefully if playwright is not installed.
 import logging
 import sys
 import asyncio

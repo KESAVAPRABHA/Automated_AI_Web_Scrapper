@@ -1,7 +1,5 @@
-"""
-requests + BeautifulSoup crawler.
-Handles static/server-rendered pages; for JS-heavy sites use PlaywrightCrawler.
-"""
+#requests + BeautifulSoup crawler.
+#Handles static/server-rendered pages; for JS-heavy sites use PlaywrightCrawler.
 import logging
 from typing import Dict, List, Tuple
 
