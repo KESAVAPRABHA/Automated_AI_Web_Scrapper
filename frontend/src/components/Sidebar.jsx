@@ -13,11 +13,13 @@ export default function Sidebar({
   const [url, setUrl] = useState('')
   const [maxPages, setMaxPages] = useState(5)
   const [useJs, setUseJs] = useState(false)
+  const [fields, setFields] = useState('')
   const [exportFmt, setExportFmt] = useState('csv')
 
   const handleLoad = () => {
     if (!url.trim()) return
-    onLoadSite(url.trim(), maxPages, useJs)
+    const fieldsArray = fields.split(',').map(f => f.trim()).filter(f => f !== '')
+    onLoadSite(url.trim(), maxPages, useJs, fieldsArray.length > 0 ? fieldsArray : null)
   }
 
   const handleKeyDown = (e) => {
@@ -46,6 +48,21 @@ export default function Sidebar({
           onKeyDown={handleKeyDown}
           disabled={crawling}
         />
+
+        {/* Required Fields */}
+        <div className="sidebar-label" style={{ marginTop: 12 }}>Required Fields (Optional)</div>
+        <textarea
+          id="fields-input"
+          className="input-field"
+          style={{ height: 60, resize: 'none', fontSize: '0.8rem' }}
+          placeholder="e.g. leadership names, prices, founders"
+          value={fields}
+          onChange={e => setFields(e.target.value)}
+          disabled={crawling}
+        />
+        <div className="site-info" style={{ marginTop: 2, marginBottom: 8, fontSize: '0.7rem', color: '#6366f1' }}>
+          💡 AI will prioritize pages matching these fields.
+        </div>
 
         {/* Options */}
         <div className="options-row">

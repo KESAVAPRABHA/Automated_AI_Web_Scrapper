@@ -20,7 +20,7 @@ export default function App() {
     setMessages(prev => [...prev, { role, content, data, id: Date.now() + Math.random() }])
   }, [])
 
-  const handleLoadSite = useCallback(async (url, maxPages, useJs) => {
+  const handleLoadSite = useCallback(async (url, maxPages, useJs, fields = null) => {
     setCrawling(true)
     setMessages([])
     setLastRecords([])
@@ -30,7 +30,7 @@ export default function App() {
       const res = await fetch(`${API_BASE}/api/crawl`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url, max_pages: maxPages, use_js: useJs }),
+        body: JSON.stringify({ url, max_pages: maxPages, use_js: useJs, fields }),
       })
       if (!res.ok) {
         const err = await res.json()
