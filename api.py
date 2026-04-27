@@ -7,6 +7,8 @@ import asyncio
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from bs4 import BeautifulSoup
+from utils.helpers import make_absolute, normalize_url
 # Fix for Playwright/asyncio NotImplementedError on Windows
 if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
@@ -42,6 +44,7 @@ class CrawlRequest(BaseModel):
     url: str
     max_pages: int = 5
     use_js: bool = False
+    fields: Optional[List[str]] = None
 
 
 class CrawlResponse(BaseModel):
@@ -70,14 +73,10 @@ class ExportRequest(BaseModel):
 def generate_filename(name: str) -> str:
     if not name:
         return "scraper_results"
-
     stop_words = {"give", "me", "the", "list", "show", "get", "all","for","from","you","download"}
-
     words = name.lower().strip().split()
     words = [w for w in words if w not in stop_words]
-
     safe_name = "_".join(words)
-
     safe_name = "".join(c for c in safe_name if c.isalnum() or c == "_")
 
     return safe_name or "scraper_results"
@@ -98,6 +97,46 @@ async def crawl(req: CrawlRequest) -> CrawlResponse:
 
         loop = asyncio.get_event_loop()
 
+        if req.fields:
+            logger.info("Performing SMART CRAWL for fields: %s", req.fields)
+            # Just crawl the homepage to get links
+            initial_pages = await loop.run_in_executor(
+                None,
+                lambda: crawler.crawl(start_url=req.url.strip(), max_pages=1)
+            )
+            if not initial_pages:
+                return CrawlResponse(pages=[], count=0)
+            
+            #Extract links from homepage
+            soup = BeautifulSoup(initial_pages[0]['html'], "lxml")
+            raw_links = []
+            for a in soup.find_all("a", href=True):
+                abs_url = make_absolute(req.url.strip(), a['href'])
+                raw_links.append(normalize_url(abs_url))
+            
+            # AI to pick the best links
+            extractor = AIExtractor()
+            target_urls = await loop.run_in_executor(
+                None,
+                lambda: extractor.select_relevant_links(req.fields, raw_links, req.url.strip())
+            )
+            
+            # Crawl ONLY the target URLs (plus the homepage we already have)
+            final_pages = [initial_pages[0]]
+            # Use a set to avoid recrawling the homepage if the AI picked it
+            to_crawl = [u for u in target_urls if u != initial_pages[0]['url']]
+            
+            for url in to_crawl[:req.max_pages - 1]:
+                page_data = await loop.run_in_executor(
+                    None,
+                    lambda u=url: crawler.crawl(start_url=u, max_pages=1)
+                )
+                if page_data:
+                    final_pages.append(page_data[0])
+            
+            return CrawlResponse(pages=final_pages, count=len(final_pages))
+
+        # Default BFS Crawl
         pages = await loop.run_in_executor(
             None,
             lambda: crawler.crawl(
@@ -106,7 +145,6 @@ async def crawl(req: CrawlRequest) -> CrawlResponse:
                 same_domain=True,
             ),
         )
-
         return CrawlResponse(pages=pages, count=len(pages))
 
     except Exception as exc:

@@ -38,27 +38,11 @@ _EXTRACT_TEXT_JS = """() => {
 
 
 class PlaywrightCrawler:
-    """
-    Chromium-based crawler using Playwright (sync API).
-
-    Use when the target site requires JavaScript to render content.
-
-    Parameters
-    ----------
-    delay : float
-        Seconds to wait between page navigations.
-    headless : bool
-        Run browser headlessly (no visible window).
-    """
-
     def __init__(self, delay: float = 1.5, headless: bool = True) -> None:
         self.delay = delay
         self.headless = headless
 
-    # ── Private helpers ────────────────────────────────────────────────────────
-
     def _fetch_page(self, page, url: str) -> Tuple[str, str]:
-        """Navigate to *url* and return (html, visible_text)."""
         try:
             # Step 1: Navigate — try networkidle first, fall back to domcontentloaded
             try:
@@ -97,7 +81,6 @@ class PlaywrightCrawler:
             return "", ""
 
     def _extract_links(self, page, base_url: str) -> List[str]:
-        """Return all absolute hrefs found on the current page."""
         try:
             hrefs: List[str] = page.evaluate(
                 "() => Array.from(document.querySelectorAll('a[href]')).map(a => a.href)"
@@ -106,15 +89,12 @@ class PlaywrightCrawler:
             hrefs = []
         return [normalize_url(h) for h in hrefs if h.startswith("http")]
 
-    # ── Public API ─────────────────────────────────────────────────────────────
-
     def crawl(
         self,
         start_url: str,
         max_pages: int = 10,
         same_domain: bool = True,
     ) -> List[Dict]:
-        """Crawl from *start_url* using a headless Chromium browser."""
         try:
             from playwright.sync_api import sync_playwright
         except ImportError:
@@ -172,6 +152,5 @@ class PlaywrightCrawler:
                 rate_limit(self.delay)
 
             browser.close()
-
         logger.info("[Playwright] Finished. %d pages crawled.", len(results))
         return results

@@ -30,27 +30,13 @@ _NOISE_TAGS = ["script", "style", "noscript", "header", "footer", "nav", "aside"
 
 
 class Crawler:
-    """
-    Breadth-first web crawler using requests + BeautifulSoup.
-
-    Parameters
-    ----------
-    delay : float
-        Seconds to wait between requests.
-    timeout : int
-        HTTP request timeout in seconds.
-    """
-
     def __init__(self, delay: float = 1.0, timeout: int = 15) -> None:
         self.delay = delay
         self.timeout = timeout
         self.session = requests.Session()
         self.session.headers.update(_DEFAULT_HEADERS)
 
-    # ── Private helpers ────────────────────────────────────────────────────────
-
     def _fetch(self, url: str) -> Tuple[str, str]:
-        """Return (html, cleaned_text) for *url*, or ("", "") on error."""
         try:
             resp = self.session.get(url, timeout=self.timeout)
             resp.raise_for_status()
@@ -75,19 +61,12 @@ class Crawler:
                 links.append(normalized)
         return links
 
-    # ── Public API ─────────────────────────────────────────────────────────────
-
     def crawl(
         self,
         start_url: str,
         max_pages: int = 10,
         same_domain: bool = True,
     ) -> List[Dict]:
-        """
-        Crawl from *start_url* and return a list of page dicts.
-
-        Each dict has keys: ``url``, ``text``, ``html``.
-        """
         start_url = normalize_url(start_url)
         visited: set = set()
         queue: List[str] = [start_url]
@@ -115,6 +94,5 @@ class Crawler:
                     queue.append(lnk)
 
             rate_limit(self.delay)
-
         logger.info("[Crawler] Finished. %d pages crawled.", len(results))
         return results

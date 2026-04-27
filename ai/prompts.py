@@ -23,6 +23,7 @@ Rules:
 JSON output:""",
 )
 
+
 CHAT_PROMPT = PromptTemplate(
     input_variables=["user_query", "pages_summary", "url"],
     template="""You are an intelligent web extraction assistant helping a user analyse a website.
@@ -43,6 +44,25 @@ Instructions:
   populate "data" with one dict per item, using sensible key names.
 - If the user asks a yes/no or descriptive question, set "data" to [].
 - Return ONLY valid JSON — no markdown fences, no extra text.
+
+JSON output:""",
+)
+
+
+LINK_FILTER_PROMPT = PromptTemplate(
+    input_variables=["fields", "links", "url"],
+    template="""You are a web navigation expert.
+A user wants to extract these fields: {fields}
+From this website: {url}
+
+Here is a list of links found on the homepage:
+{links}
+
+Based on the link text and URLs, which 3-5 links are MOST likely to contain the requested information?
+Include the 'About', 'Team', 'Leadership', 'Careers', or 'Contact' pages if relevant to the fields.
+
+Return ONLY a valid JSON list of strings (the absolute URLs).
+Example: ["https://example.com/about", "https://example.com/team"]
 
 JSON output:""",
 )

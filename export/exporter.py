@@ -6,12 +6,8 @@ from typing import Dict, List
 import pandas as pd
 
 logger = logging.getLogger(__name__)
-
-
 class Exporter:
-    """Export a list of record dicts to CSV, Excel, or JSON."""
-
-    # ── File export ────────────────────────────────────────────────────────────
+    #Export a list of record dicts to CSV, Excel, or JSON.
 
     def export(
         self,
@@ -19,11 +15,6 @@ class Exporter:
         output_path: str,
         fmt: str = "csv",
     ) -> str:
-        """
-        Write *records* to *output_path* in the given *fmt*.
-
-        Returns the final output path (may differ for xlsx).
-        """
         if not records:
             raise ValueError("No records to export — nothing to write.")
 
@@ -54,13 +45,7 @@ class Exporter:
         logger.info("Exported %d records → %s", len(records), output_path)
         return output_path
 
-    # ── In-memory bytes (for Streamlit download) ───────────────────────────────
-
     def to_bytes(self, records: List[Dict], fmt: str = "csv") -> bytes:
-        """
-        Serialise *records* to raw bytes without touching the filesystem.
-        Used by Streamlit's ``st.download_button``.
-        """
         if not records:
             return b""
 

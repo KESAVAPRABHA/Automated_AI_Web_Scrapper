@@ -13,14 +13,12 @@ from tenacity import (
     wait_exponential,
 )
 
-from ai.prompts import CHAT_PROMPT, EXTRACTION_PROMPT
+from ai.prompts import CHAT_PROMPT, EXTRACTION_PROMPT, LINK_FILTER_PROMPT
 from config import DEFAULT_MODEL, GOOGLE_API_KEY
 
 logger = logging.getLogger(__name__)
 
-# Maximum characters of page text sent to the LLM per call
 _PAGE_TEXT_LIMIT = 12_000
-# Maximum characters of combined pages text for chat queries (Gemini 2.5 Flash has 1M token ctx)
 _CHAT_TEXT_LIMIT = 40_000
 
 
@@ -41,6 +39,7 @@ class AIExtractor:
         )
         self._extraction_chain = EXTRACTION_PROMPT | self._llm | StrOutputParser()
         self._chat_chain = CHAT_PROMPT | self._llm | StrOutputParser()
+        self._link_filter_chain = LINK_FILTER_PROMPT | self._llm | StrOutputParser()
 
     @staticmethod
     def _parse_json(raw: str) -> Dict[str, Any]:
@@ -142,3 +141,22 @@ class AIExtractor:
             else:
                 err_msg = f"AI error: {exc}"
             return {"answer": err_msg, "data": []}
+
+    def select_relevant_links(self, fields: List[str], links: List[str], url: str) -> List[str]:
+        if not links:
+            return []
+        try:
+            raw = self._link_filter_chain.invoke(
+                {
+                    "fields": ", ".join(fields),
+                    "links": "\n".join(links[:50]),
+                    "url": url,
+                }
+            )
+            parsed = self._parse_json(raw)
+            if isinstance(parsed, list):
+                return [str(l) for l in parsed]
+            return []
+        except Exception as exc:
+            logger.error("select_relevant_links() error: %s", exc)
+            return []
