@@ -15,10 +15,7 @@ SAMPLE_RECORDS = [
 def exporter():
     from export.exporter import Exporter
     return Exporter()
-
-
 # File export tests 
-
 def test_export_csv(exporter, tmp_path):
     out = str(tmp_path / "out.csv")
     exporter.export(SAMPLE_RECORDS, out, "csv")
@@ -26,8 +23,6 @@ def test_export_csv(exporter, tmp_path):
     df = pd.read_csv(out)
     assert len(df) == 2
     assert "name" in df.columns and "title" in df.columns
-
-
 def test_export_json(exporter, tmp_path):
     out = str(tmp_path / "out.json")
     exporter.export(SAMPLE_RECORDS, out, "json")
@@ -36,8 +31,6 @@ def test_export_json(exporter, tmp_path):
         data = json.load(f)
     assert len(data) == 2
     assert data[0]["name"] == "Jane Doe"
-
-
 def test_export_excel(exporter, tmp_path):
     out = str(tmp_path / "out.xlsx")
     exporter.export(SAMPLE_RECORDS, out, "excel")
@@ -45,20 +38,12 @@ def test_export_excel(exporter, tmp_path):
     df = pd.read_excel(out)
     assert len(df) == 2
     assert "title" in df.columns
-
-
 def test_export_invalid_format(exporter, tmp_path):
     with pytest.raises(ValueError, match="Unsupported format"):
         exporter.export(SAMPLE_RECORDS, str(tmp_path / "out.xml"), "xml")
-
-
 def test_export_empty_records(exporter, tmp_path):
     with pytest.raises(ValueError, match="No records"):
         exporter.export([], str(tmp_path / "out.csv"), "csv")
-
-
-# In-memory bytes tests
-
 def test_to_bytes_csv(exporter):
     raw = exporter.to_bytes(SAMPLE_RECORDS, "csv")
     assert isinstance(raw, bytes)

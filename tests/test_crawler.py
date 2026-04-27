@@ -25,9 +25,7 @@ def _mock_response(html: str, status: int = 200):
     resp.text = html
     resp.raise_for_status = MagicMock()
     return resp
-
-
-@patch("scraper.crawler.rate_limit")          # skip sleep
+@patch("scraper.crawler.rate_limit")   
 @patch("scraper.crawler.requests.Session")
 def test_crawl_single_page(MockSession, mock_rl):
     #Single-page crawl returns one result with text.

@@ -1,8 +1,6 @@
 import json
 import pytest
 from unittest.mock import MagicMock, patch
-
-
 SAMPLE_PAGE_TEXT = """
 CEO: Jane Doe
 CTO: John Smith
@@ -13,7 +11,6 @@ Location: San Francisco, CA
 GOOD_JSON = json.dumps({"CEO": "Jane Doe", "CTO": "John Smith"})
 FENCED_JSON = f"```json\n{GOOD_JSON}\n```"
 BAD_JSON = "Sorry, I cannot extract that."
-
 
 def _make_extractor(llm_return: str):
     #Return an AIExtractor whose LLM always returns *llm_return*.
