@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+.env
+.streamlit/
+results.csv
+results.json
+*.xlsx
+node_modules/
+package-lock.json

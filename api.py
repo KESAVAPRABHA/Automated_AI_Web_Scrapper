@@ -71,7 +71,7 @@ def generate_filename(name: str) -> str:
     if not name:
         return "scraper_results"
 
-    stop_words = {"give", "me", "the", "list", "show", "get", "all"}
+    stop_words = {"give", "me", "the", "list", "show", "get", "all","for","from","you","download"}
 
     words = name.lower().strip().split()
     words = [w for w in words if w not in stop_words]
