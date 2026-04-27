@@ -2,7 +2,7 @@
 
 An AI-powered web scraper that accepts a website URL, crawls pages, extracts structured data using **Gemini 1.5 Flash** (via LangChain), and exports results as CSV / Excel / JSON.
 
-Comes with a **Streamlit chatbot UI** where you can have a natural-language conversation about any website.
+Comes with a **React chatbot UI** where you can have a natural-language conversation about any website.
 
 ---
 
@@ -10,7 +10,7 @@ Comes with a **Streamlit chatbot UI** where you can have a natural-language conv
 
 | Feature | Details |
 |---|---|
-| **Chatbot UI** | Streamlit dark-mode chat interface |
+| **Chatbot UI** | React chat interface |
 | **Smart Crawling** | requests + BeautifulSoup (static) or Playwright (JS/SPA) |
 | **AI Extraction** | LangChain + Gemini 1.5 Flash |
 | **Any fields** | Ask for leadership names, prices, job openings — anything |
