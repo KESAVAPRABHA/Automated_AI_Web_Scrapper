@@ -12,7 +12,7 @@ Comes with a **React chatbot UI** where you can have a natural-language conversa
 |---|---|
 | **Chatbot UI** | React chat interface |
 | **Smart Crawling** | requests + BeautifulSoup (static) or Playwright (JS/SPA) |
-| **AI Extraction** | LangChain + Gemini 1.5 Flash |
+| **AI Extraction** | LangChain + Gemini 2.5 Flash |
 | **Any fields** | Ask for leadership names, prices, job openings — anything |
 | **Export** | Download CSV, Excel (.xlsx), or JSON from the sidebar |
 | **CLI** | Headless `python main.py` mode for scripting/automation |
